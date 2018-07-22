@@ -2,6 +2,7 @@ const passport = require('passport');
 const User = require("../models/user-model.js");
 const Mailbox = require("../models/mailbox-model.js");
 
+// serialize : saving user data in the session
 passport.serializeUser((userDoc, done) => {
     console.log("SERIALIZE (save to session)");
     done(null, userDoc._id);

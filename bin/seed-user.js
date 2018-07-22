@@ -7,7 +7,7 @@ const User = require("../models/user-model.js");
 mongoose.Promise = Promise;
 
 mongoose
-    .connect("mongodb://localhost/running-women-backend", {useMongoClient: true})
+    .connect("mongodb://localhost/running-women-be", {useMongoClient: true})
     .then(() => {
         console.log('Connected to MongoDB for users!')
     }).catch(err => {

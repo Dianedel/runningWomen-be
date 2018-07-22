@@ -7,7 +7,7 @@ const Mailbox = require("../models/mailbox-model.js");
 mongoose.Promise = Promise;
 
 mongoose
-    .connect("mongodb://localhost/running-women-backend", {userMongoClient: true})
+    .connect("mongodb://localhost/running-women-be", {userMongoClient: true})
     .then(() => {
         console.log('Connected to MongoDB!')
     }).catch(err => {
@@ -25,10 +25,17 @@ const inputMails = [ {
     content: "Hâtez-vous lentement, et sans perdre courage, \n Vingt fois sur le métier remettez votre ouvrage, \n Polissez-le sans cesse, et le repolissez, \n Ajoutez quelquefois, et souvent effacez."
 },]
 
-Mailbox.create(inputMails)
-.then((mailboxResults) => {
-    console.log(`Created ${mailboxResults.length} mailbox in the DB`)
-})
-.catch((err) => {
-    console.log(`Create mailbox FAIL`, err)
+inputMails.forEach((oneMail) => {
+    User.findOne({ email: oneMail.user })
+    .then(userDoc => {
+        oneMail.user = userDoc._id;
+        Mailbox.create(inputMails)
+        .then((mailboxResults) => {
+            console.log(`Created ${mailboxResults.length} mailbox in the DB`)
+        })
+        .catch((err) => {
+            console.log(`Create mailbox FAIL`, err)
+        });
+    })
+    .catch(err => { throw err });
 });

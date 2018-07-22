@@ -12,11 +12,10 @@ const session      = require('express-session');
 const MongoStore   = require('connect-mongo')(session);
 const passportSetup = require("./passport/setup.js");
 
-// 'mongodb://localhost/running-women-backend'
 
 mongoose.Promise = Promise;
 mongoose
-  .connect("mongodb://localhost/running-women-backend", {useMongoClient: true})
+  .connect("mongodb://localhost/runningWomen-be", {useMongoClient: true})
   .then(() => {
     console.log('Connected to Mongo!')
   }).catch(err => {
@@ -58,7 +57,6 @@ passportSetup(app);
 
 // default value for title local
 app.locals.title = 'Women Who Run';
-
 
 
 const index = require('./routes/index');
