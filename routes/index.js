@@ -11,12 +11,27 @@ router.get('/', (req, res, next) => {
   res.render('index');
 });
 
+
+// { $or: [ {sender:ObjectId('5b55934a018c6d0164107088')}, {receiver:ObjectId('5b55934a018c6d0164107088')} ] }
 router.get("/mailbox", (req, res, next) => {
   Mailbox
-  .find()
+  .find({ $or: [ {sender: req.user._id}, {receiver: req.user._id} ] })
+  .populate("sender", { encryptedPassword: 0 })
+  .populate("receiver", { encryptedPassword: 0 })
   .sort({ createAt: -1 }) // le plus récent en premier
   .then((mailboxResults) => {
     res.json(mailboxResults);
+  })
+  .catch((err) => {
+    next(err);
+  });
+});
+
+router.get("/markers", (req, res, next) => {
+  User
+  .find()
+  .then((users) => {
+    res.json(users.map(u => u.coordinates));
   })
   .catch((err) => {
     next(err);
@@ -84,17 +99,17 @@ router.delete("/mailbox/:id", (req, res, next) => {
 // AUTH ROUTER
 //POST /signup
 router.post("/signup", (req, res, next) => {
-  const { firstName, lastName, email, location, originalPassword } = req.body;
+  const { firstName, lastName, email, location, coordinates, originalPassword } = req.body;
 
-  if (originalPassword === "" || originalPassword.match(/[0-9]/) === null) {
+  if (!originalPassword || originalPassword.match(/[0-9]/) === null) {
     const err = new Error("Le mot de passe doit contenir au moins un caractère et un chiffre");
     next(err);
     return;
   }
 
-  const encryptedPassword = bcrypt.hasSync(originalPassword, 10);
+  const encryptedPassword = bcrypt.hashSync(originalPassword, 10);
 
-  User.create({ firstName, lastName, email, encryptedPassword})
+  User.create({ firstName, lastName, email, location, coordinates, encryptedPassword})
   .then((userDoc) => {
     // log the user immediately after signing up
     req.login(userDoc, () => {

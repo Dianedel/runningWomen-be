@@ -7,7 +7,7 @@ const User = require("../models/user-model.js");
 mongoose.Promise = Promise;
 
 mongoose
-    .connect("mongodb://localhost/running-women-be", {useMongoClient: true})
+    .connect(process.env.MONGODB_URI, {useMongoClient: true})
     .then(() => {
         console.log('Connected to MongoDB for users!')
     }).catch(err => {
@@ -19,7 +19,7 @@ const inputUsers = [ {
     firstName: "Anne",
     lastName: "Haliz",
     email: "anne@haliz.fr",
-    birthday: 15/04/1987,
+    birthday: "15.04.1987",
     location: "Paris",
     speed: 4.30,
     availability: "Week-end",
@@ -31,11 +31,11 @@ const inputUsers = [ {
     firstName: "Sandra",
     lastName: "Nicouette",
     email: "sandra@nicouette.com",
-    birthday: 22/08/1985,
+    birthday: "22.08.1985",
     location: "Paris",
     speed: 3.80,
     availability: "Week-end",
-    description: "Coureuse régulière, marathons",
+    description: "Coureuse expérimentée, marathons",
     imageUrl: "",
     role: "user",
     encryptedPassword: bcrypt.hashSync("1234", 10)

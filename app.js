@@ -10,12 +10,13 @@ const logger       = require('morgan');
 const path         = require('path');
 const session      = require('express-session');
 const MongoStore   = require('connect-mongo')(session);
+const cors         = require('cors');
 const passportSetup = require("./passport/setup.js");
 
 
 mongoose.Promise = Promise;
 mongoose
-  .connect("mongodb://localhost/runningWomen-be", {useMongoClient: true})
+  .connect(process.env.MONGODB_URI, {useMongoClient: true})
   .then(() => {
     console.log('Connected to Mongo!')
   }).catch(err => {
@@ -46,6 +47,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
+app.use(cors({
+  credentials: true,
+  origin: [ 'http://localhost:4200' ]
+}));
 app.use(session({
   secret: "secret should be different for every app",
   saveUninitialized: true,
@@ -60,7 +65,7 @@ app.locals.title = 'Women Who Run';
 
 
 const index = require('./routes/index');
-app.use('/', index);
+app.use('/api', index);
 
 
 module.exports = app;

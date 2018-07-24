@@ -15,6 +15,8 @@ const mailboxSchema = new Schema ({
         required: false,
         minlength: 1,
         maxlength: 2000 },
+}, {
+    timestamps: true
 });
 
 const Mailbox = mongoose.model("Mailbox", mailboxSchema);

@@ -16,8 +16,11 @@ const userSchema = new Schema ({
     birthday: {
         type: Date },
     location: {
-        type: String,
+        type: Object,
         required: true },
+    coordinates: [
+        { type: Number }
+    ],
     speed: {
         type: Number },
     availability: {
