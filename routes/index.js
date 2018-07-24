@@ -1,8 +1,10 @@
 const express = require('express');
-const bcrypt = require("bcrypt");
+const bcrypt  = require("bcrypt");
 
-const User = require("../models/user-model.js");
+const User    = require("../models/user-model.js");
 const Mailbox = require("../models/mailbox-model.js");
+
+const upload  = require('../configs/multer');
 
 const router  = express.Router();
 
@@ -11,6 +13,26 @@ router.get('/', (req, res, next) => {
   res.render('index');
 });
 
+//POST files upload Photo
+router.post('/', upload.single('file'), function(req, res) {
+  const photo = new photo({
+    name: req.body.name,
+    // brand: req.body.brand,
+    image: `/uploads/${req.file.filename}`,
+    specs: JSON.parse(req.body.specs) || []
+  });
+
+  photo.save((err) => {
+    if (err) {
+      return res.send(err);
+    }
+
+    return res.json({
+      message: 'Photo téléchargé',
+      photo: photo
+    });
+  });
+});
 
 // { $or: [ {sender:ObjectId('5b55934a018c6d0164107088')}, {receiver:ObjectId('5b55934a018c6d0164107088')} ] }
 router.get("/mailbox", (req, res, next) => {
