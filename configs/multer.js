@@ -1,15 +1,22 @@
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
+const cloudinary = require("cloudinary");
+const cloudinaryStorage = require("multer-storage-cloudinary");
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, './public/uploads/')
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}${path.extname(file.originalname)}`)
+cloudinary.config({
+  cloud_name: process.env.cloudinary_name,
+  api_key: process.env.cloudinary_key,
+  api_secret: process.env.cloudinary_secret
+});
+const storage = cloudinaryStorage({
+  cloudinary,
+  folder: "wwr-pictures",
+  params: {
+    resource_type: "raw"
   }
 });
 
-const upload   = multer({ storage });
-module.exports = upload;
+// const { secure_url } = req.file;
 
+const upload = multer({ storage });
+
+module.exports = upload;

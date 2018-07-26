@@ -9,10 +9,10 @@ const router  = express.Router();
 
 const transport =
   nodemailer.createTransport({
-    service: 'Gmail',
+    service: 'Hotmail',
     auth: {
-      user: process.env.gmail_email,
-      pass: process.env.gmail_password
+      user: process.env.hotmail_email,
+      pass: process.env.hotmail_password
     }
   });
 
@@ -228,23 +228,38 @@ router.get("/checklogin", (req, res, next) => {
 });
 
 // add photo and update personal information
-// router.put("/photo/:id", (req, res, next) => {
-//   const { id } = req.params;
-//   const { location, speed, availability, description, imageUrl } = req.body;
+router.put("/photo/:id", (req, res, next) => {
+  const { id } = req.params;
+  const { imageUrl } = req.body;
 
-//   Photo.findByIdAndUpdate(
-//     id,
-//     { $set: { location, speed, availability, description, imageUrl } },
-//     { runValidators: true, new: true}
-//   )
-//   .then((photoDoc) => {
-//     res.json(photoDoc);
-//   })
-//   .catch((err) => {
-//     next(err);
-//   });
-// });
+  Photo.findByIdAndUpdate(
+    id,
+    { $set: { imageUrl } },
+    { runValidators: true, new: true}
+  )
+  .then((photoDoc) => {
+    res.json(photoDoc);
+  })
+  .catch((err) => {
+    next(err);
+  });
+});
 
+router.put("/photo/:id", (req, res, next) => {
+  const { id } = req.params;
+  const { location, speed, availability, description } =req.body;
+  Photo.findByIdAndUpdate(
+    id,
+    { $set: { location, speed, availability, description } },
+    { runValidators: true, new: true }
+  )
+  .then((photoDoc) => {
+    res.json(photoDoc);
+  })
+  .catch((err) => {
+    next(err);
+  });
+});
 
 
 module.exports = router;
