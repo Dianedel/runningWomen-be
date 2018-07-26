@@ -1,16 +1,42 @@
 const express = require('express');
 const bcrypt  = require("bcrypt");
-
 const User    = require("../models/user-model.js");
 const Mailbox = require("../models/mailbox-model.js");
-
+const nodemailer = require ("nodemailer");
 const upload  = require('../configs/multer');
 
 const router  = express.Router();
 
+const transport =
+  nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: process.env.gmail_email,
+      pass: process.env.gmail_password
+    }
+  });
+
+
 /* GET home page */
 router.get('/', (req, res, next) => {
   res.render('index');
+});
+
+// profil user
+router.get("/profil/:id", (req, res, next) => {
+  const { id } = req.params;
+
+  User.findById(id)
+  .then((userDoc) => {
+    if (!userDoc) {
+      next();
+      return;
+    }
+    res.json(userDoc);
+  })
+  .catch((err) => {
+    next(err);
+  });
 });
 
 //POST files upload Photo
@@ -51,9 +77,9 @@ router.get("/mailbox", (req, res, next) => {
 
 router.get("/markers", (req, res, next) => {
   User
-  .find()
+  .find({}, { firstName: 1, lastName: 1, location: 1, coordinates: 1 })
   .then((users) => {
-    res.json(users.map(u => u.coordinates));
+    res.json(users);
   })
   .catch((err) => {
     next(err);
@@ -121,7 +147,7 @@ router.delete("/mailbox/:id", (req, res, next) => {
 // AUTH ROUTER
 //POST /signup
 router.post("/signup", (req, res, next) => {
-  const { firstName, lastName, email, location, coordinates, originalPassword } = req.body;
+  const { firstName, lastName, email, location, birthday, coordinates, originalPassword } = req.body;
 
   if (!originalPassword || originalPassword.match(/[0-9]/) === null) {
     const err = new Error("Le mot de passe doit contenir au moins un caractère et un chiffre");
@@ -131,8 +157,18 @@ router.post("/signup", (req, res, next) => {
 
   const encryptedPassword = bcrypt.hashSync(originalPassword, 10);
 
-  User.create({ firstName, lastName, email, location, coordinates, encryptedPassword})
+  User.create({ firstName, lastName, email, location, birthday, coordinates, encryptedPassword})
   .then((userDoc) => {
+    transport.sendMail({
+      from: "Wonder Who Run <wonderwhorun@hotmail.com>",  // Gmail ignores this
+      to: `${fullName} <${email}>`,
+      subject: "🤩 Inscription Wonder Who Run!",
+      text: `Bienvenue, ${fullName}! Merci pour votre inscription sur Wonder Who Run.`,
+      html: `
+        <h1 style="color: orange;">Bienvenue, ${fullName}!</h1>
+        <p>Merci pour votre inscription sur Wonder Who Run.</p>
+      `
+    })
     // log the user immediately after signing up
     req.login(userDoc, () => {
       userDoc.encryptedPassword = undefined;
@@ -191,5 +227,25 @@ router.get("/checklogin", (req, res, next) => {
   }
   res.json({ userDoc: req.user });
 });
+
+// add photo and update personal information
+// router.put("/photo/:id", (req, res, next) => {
+//   const { id } = req.params;
+//   const { location, speed, availability, description, imageUrl } = req.body;
+
+//   Photo.findByIdAndUpdate(
+//     id,
+//     { $set: { location, speed, availability, description, imageUrl } },
+//     { runValidators: true, new: true}
+//   )
+//   .then((photoDoc) => {
+//     res.json(photoDoc);
+//   })
+//   .catch((err) => {
+//     next(err);
+//   });
+// });
+
+
 
 module.exports = router;

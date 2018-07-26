@@ -11,10 +11,7 @@ passport.serializeUser((userDoc, done) => {
 passport.deserializeUser((idFromSession, done) => {
     User.findById(idFromSession)
     .then((userDoc) => {
-        if (userDoc) {
-            done(null, userDoc);
-            return;
-        }
+        done(null, userDoc);
     })
     .catch((err) => {
         done(err);
