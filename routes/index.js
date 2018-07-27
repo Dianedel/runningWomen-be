@@ -85,17 +85,17 @@ router.get("/markers", (req, res, next) => {
   });
 });
 
-router.post("/mailbox", (req, res, next) => {
-  const { sender, receiver, content } = req.body;
+// router.post("/mailbox", (req, res, next) => {
+//   const { sender, receiver, content } = req.body;
 
-  Mailbox.create({ sender, recever, content })
-  .then((mailboxDoc) => {
-    res.json(mailboxDoc);
-  })
-  .catch((err) => {
-    next(err);
-  })
-})
+//   Mailbox.create({ sender, receiver, content })
+//   .then((mailboxDoc) => {
+//     res.json(mailboxDoc);
+//   })
+//   .catch((err) => {
+//     next(err);
+//   })
+// })
 
 router.get("/mailbox/:id", (req, res, next) => {
   const { sender, receiver, content } = req.params;
@@ -114,14 +114,11 @@ router.get("/mailbox/:id", (req, res, next) => {
   });
 });
 
-router.put("/mailbox/:id", (req, res, next) => {
-  const { id } = req.params;
-  const { sender, receiver, content } = req.body;
-  Mailbox.findByIdAndUpdate(
-  id,
-  { $set: {sender, receiver, content } },
-  { runValidators: true, new: true }
-)
+router.post("/mailbox", (req, res, next) => {
+  console.log(req.body)
+ // const sender = req.user._id
+  const {receiver, content } = req.body;
+  Mailbox.create({sender:req.user._id, receiver, content })
 .then((mailboxDoc) => {
   res.json(mailboxDoc);
 })
@@ -160,11 +157,11 @@ router.post("/signup", (req, res, next) => {
   .then((userDoc) => {
     transport.sendMail({
       from: "Wonder Who Run <wonderwhorun@hotmail.com>",  // Gmail ignores this
-      to: `${fullName} <${email}>`,
+      to: `${firstName} ${lastName} <${email}>`,
       subject: "🤩 Inscription Wonder Who Run!",
-      text: `Bienvenue, ${fullName}! Merci pour votre inscription sur Wonder Who Run.`,
+      text: `Bienvenue, ${firstName} ${lastName}! Merci pour votre inscription sur Wonder Who Run.`,
       html: `
-        <h1 style="color: orange;">Bienvenue, ${fullName}!</h1>
+        <h1 style="color: orange;">Bienvenue, ${firstName} ${lastName}!</h1>
         <p>Merci pour votre inscription sur Wonder Who Run.</p>
       `
     })
@@ -228,32 +225,36 @@ router.get("/checklogin", (req, res, next) => {
 });
 
 // add photo and update personal information
-router.put("/photo/:id", (req, res, next) => {
-  const { id } = req.params;
+router.post("/photos", (req, res, next) => {
+  const { id } = req.user._id;
   const { imageUrl } = req.body;
-
-  Photo.findByIdAndUpdate(
+console.log(req.user._id)
+  User.findByIdAndUpdate(
     id,
     { $set: { imageUrl } },
     { runValidators: true, new: true}
   )
-  .then((photoDoc) => {
-    res.json(photoDoc);
+  .then((userDoc) => {
+    console.log(userDoc)
+    res.json(userDoc);
   })
   .catch((err) => {
     next(err);
   });
 });
 
-router.put("/photo/:id", (req, res, next) => {
-  const { id } = req.params;
+router.post("/info", (req, res, next) => {
+  console.log("je suis la")
+  const id = req.user._id;
+  // const {_id} = req.user;
   const { location, speed, availability, description } =req.body;
-  Photo.findByIdAndUpdate(
+  User.findByIdAndUpdate(
     id,
     { $set: { location, speed, availability, description } },
     { runValidators: true, new: true }
   )
   .then((photoDoc) => {
+    photoDoc.encryptedPassword = undefined;
     res.json(photoDoc);
   })
   .catch((err) => {
